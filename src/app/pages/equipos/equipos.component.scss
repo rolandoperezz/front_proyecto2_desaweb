@@ -1,0 +1,20 @@
+.logo {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: .5rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,.1);
+}
+
+.logo-preview {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: .75rem;
+  border: 1px solid rgba(0,0,0,.08);
+}
+
+:host ::ng-deep .p-table {
+  border-radius: 1rem;
+  overflow: hidden;
+}

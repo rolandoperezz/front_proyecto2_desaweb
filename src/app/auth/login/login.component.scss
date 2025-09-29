@@ -1,0 +1,74 @@
+/* Badge del header */
+.brand-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #6366f1, #3b82f6);
+  box-shadow: 0 8px 20px rgba(59,130,246,.35);
+}
+
+/* Ajustes visuales coherentes con PrimeNG */
+.p-inputgroup .p-inputtext,
+::ng-deep .p-password input {
+  height: 2.9rem;
+}
+
+/* Redondeo del lado derecho del p-password dentro del inputgroup */
+.border-round-right {
+  border-top-right-radius: var(--border-radius) !important;
+  border-bottom-right-radius: var(--border-radius) !important;
+}
+
+/* Efecto sutil al botón */
+.p-button {
+  font-weight: 600;
+  box-shadow: 0 10px 24px rgba(59,130,246,.25);
+}
+
+/* Card redondeada ya lo maneja border-round-2xl, solo reforzamos sombra suave */
+:host ::ng-deep .p-card {
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .25);
+}
+
+/* Modo compacto en pantallas muy pequeñas */
+@media (max-width: 420px) {
+  :host ::ng-deep .p-card .p-card-content { padding: 1rem !important; }
+}
+
+
+/* Altura base usada también en usuario */
+$input-h: 2.9rem;
+
+/* p-password debe comportarse como input dentro del inputgroup */
+:host ::ng-deep .p-inputgroup .pw-group-flex {
+  flex: 1 1 auto;            /* ocupa todo el espacio restante */
+  min-width: 0;              /* evita desbordes */
+}
+
+/* Estilo del INPUT interno de p-password */
+:host ::ng-deep .pw-input {
+  height: $input-h !important;
+  border-top-left-radius: 0 !important;     /* el addon ya redondea el lado izq */
+  border-bottom-left-radius: 0 !important;
+  border-top-right-radius: var(--border-radius) !important;
+  border-bottom-right-radius: var(--border-radius) !important;
+}
+
+/* Alineación vertical y altura del addon del candado */
+:host ::ng-deep .p-inputgroup .p-inputgroup-addon {
+  height: $input-h;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-top-left-radius: var(--border-radius) !important;
+  border-bottom-left-radius: var(--border-radius) !important;
+}
+
+/* Icono de toggle (ojo) dentro del p-password */
+:host ::ng-deep .p-password .p-password-panel { display: none !important; } /* ya usamos feedback=false */
+:host ::ng-deep .p-password .p-password-input::-ms-reveal { display: none; } /* IE/Edge legacy */
+
+/* Asegurar mismo tamaño que el input de usuario */
+:host ::ng-deep .p-inputgroup .p-inputtext {
+  height: $input-h;
+}

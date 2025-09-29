@@ -1,0 +1,96 @@
+<p-toast></p-toast>
+
+<!-- Lienzo centrado con PrimeFlex -->
+<div class="min-h-screen surface-ground flex align-items-center justify-content-center px-3 py-5">
+  <div class="w-full" style="max-width: 460px">
+    <p-card class="shadow-5 border-round-2xl overflow-hidden">
+      <ng-template pTemplate="header">
+        <div class="flex align-items-center gap-3 px-2 py-2">
+          <span class="brand-badge flex align-items-center justify-content-center">
+            <i class="pi pi-shield text-0"></i>
+          </span>
+          <div class="flex flex-column">
+            <span class="font-semibold text-900">Ingreso al sistema</span>
+            <small class="text-600">Panel de administración</small>
+          </div>
+        </div>
+      </ng-template>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="p-fluid" novalidate>
+        <!-- Usuario -->
+        <div class="field">
+          <label for="username" class="block mb-2 text-900 font-medium">Usuario</label>
+          <div class="p-inputgroup">
+            <span class="p-inputgroup-addon">
+              <i class="pi pi-user"></i>
+            </span>
+            <input
+              pInputText
+              id="username"
+              formControlName="username"
+              placeholder="Tu usuario"
+              [class.p-invalid]="submitted && form.get('username')?.invalid"
+            />
+          </div>
+          <small *ngIf="submitted && form.get('username')?.errors" class="p-error block mt-1">
+            El usuario es obligatorio (mín. 3).
+          </small>
+        </div>
+
+        <!-- Contraseña -->
+       <div class="field">
+  <label for="password" class="block mb-2 text-900 font-medium">Contraseña</label>
+
+  <div class="p-inputgroup">
+    <span class="p-inputgroup-addon">
+      <i class="pi pi-lock"></i>
+    </span>
+
+    <!-- Nota: usamos inputStyleClass para dar estilo al INPUT interno -->
+   <input
+             pInputText
+              type="password"
+              id="password"
+              formControlName="password"
+              placeholder="Tu contraseña"
+              [class.p-invalid]="submitted && form.get('password')?.invalid"
+            />
+  </div>
+
+  <small *ngIf="submitted && form.get('password')?.errors" class="p-error block mt-1">
+    La contraseña es obligatoria (mín. 4).
+  </small>
+</div>
+
+
+        <!-- Utilidades -->
+        <div class="flex align-items-center justify-content-between mb-3">
+          <!-- <div class="flex align-items-center gap-2">
+            <p-inputSwitch [(ngModel)]="remember" name="remember"></p-inputSwitch>
+            <span class="text-700">Recordarme</span>
+          </div> -->
+          <a class="text-600 hover:text-800" href="#" (click)="$event.preventDefault()">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <!-- Botón -->
+        <button
+          pButton
+          type="submit"
+          label="Ingresar"
+          class="w-full py-3 border-round-xl"
+          [disabled]="loading">
+        </button>
+
+        <!-- Loading -->
+        <div class="flex justify-content-center mt-3" *ngIf="loading">
+          <p-progressSpinner styleClass="w-2rem h-2rem"></p-progressSpinner>
+        </div>
+
+        <div class="flex align-items-center gap-2 mt-4 text-700">
+          <i class="pi pi-info-circle"></i>
+          <small>Acceso exclusivo para personal autorizado.</small>
+        </div>
+      </form>
+    </p-card>
+  </div>
+</div>

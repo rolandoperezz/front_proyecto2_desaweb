@@ -1,0 +1,182 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<p-table
+  #dt
+  [value]="jugadores"
+  dataKey="id"
+  [loading]="loading"
+  [paginator]="true"
+  [rows]="10"
+  [rowsPerPageOptions]="[10,25,50]"
+  [globalFilterFields]="['nombreCompleto','posicion','nacionalidad','equipo.nombre','numero']"
+  responsiveLayout="scroll"
+  class="shadow-1 border-round-xl"
+>
+ <ng-template pTemplate="caption">
+                        <div class="flex">
+                         <form [formGroup]="formFiltros" class="grid align-items-end">
+<p-dropdown
+        formControlName="equipoId"
+        [options]="equipos"
+        optionLabel="nombre"
+        optionValue="id"
+        placeholder="Selecciona un equipo"
+        [showClear]="true"
+        (onChange)="load()">
+      </p-dropdown>
+                         </form>
+                            <span class="p-input-icon-left ml-auto">
+                                <i class="pi pi-search"></i>
+                                <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')"  placeholder="Buscar" />
+                            </span>
+                               <button pButton type="button" icon="pi pi-filter-slash" label="Limpiar" class="p-button-text" (click)="resetFilters()"></button>
+      <button pButton type="button" icon="pi pi-plus" label="Nuevo" (click)="openNew()" [disabled]="!formFiltros.value.equipoId"></button>
+
+                        </div>
+                      
+</ng-template>
+
+  <ng-template pTemplate="header">
+    <tr>
+      <th style="width: 3.5rem">#</th>
+      <th pSortableColumn="nombreCompleto">Nombre <p-sortIcon field="nombreCompleto"></p-sortIcon></th>
+      <th pSortableColumn="posicion">Posición <p-sortIcon field="posicion"></p-sortIcon></th>
+      <th pSortableColumn="estaturaCm">Estatura (cm) <p-sortIcon field="estaturaCm"></p-sortIcon></th>
+      <th pSortableColumn="edad">Edad <p-sortIcon field="edad"></p-sortIcon></th>
+      <th pSortableColumn="nacionalidad">Nacionalidad <p-sortIcon field="nacionalidad"></p-sortIcon></th>
+      <th pSortableColumn="equipo.nombre">Equipo <p-sortIcon field="equipo.nombre"></p-sortIcon></th>
+      <th style="width: 130px" class="text-center">Acciones</th>
+    </tr>
+    <tr>
+      <th>
+      </th>
+      <th>
+        <p-columnFilter type="text" field="nombreCompleto" display="menu" placeholder="Nombre"></p-columnFilter>
+      </th>
+      <th>
+        <p-columnFilter type="text" field="posicion" display="menu" placeholder="Posición"></p-columnFilter>
+      </th>
+      <th>
+      </th>
+      <th>
+        <p-columnFilter type="numeric" field="edad" display="menu" placeholder="Edad"></p-columnFilter>
+      </th>
+      <th>
+        <p-columnFilter type="text" field="nacionalidad" display="menu" placeholder="País"></p-columnFilter>
+      </th>
+      <th>
+        <p-columnFilter type="text" field="equipo.nombre" display="menu" placeholder="Equipo"></p-columnFilter>
+      </th>
+      <th></th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-r>
+    <tr>
+      <td class="text-center">#{{ r.numero }}</td>
+      <td>{{ r.nombreCompleto }}</td>
+      <td>{{ r.posicion }}</td>
+      <td>{{ r.estaturaCm }}</td>
+      <td>{{ r.edad }}</td>
+      <td>{{ r.nacionalidad }}</td>
+      <td>
+        <div class="flex align-items-center gap-2">
+          <img [src]="r.equipo?.logoUrl" class="logo" alt="" />
+          <span>{{ r.equipo?.nombre }}</span>
+        </div>
+      </td>
+      <td class="text-center">
+        <button pButton icon="pi pi-pencil" class="p-button-text p-button-sm" (click)="openEdit(r)"></button>
+        <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" (click)="askDelete(r)"></button>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr><td colspan="8" class="text-center text-600">Seleccione un Equipo</td></tr>
+  </ng-template>
+</p-table>
+
+<p-dialog
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [draggable]="false"
+  [style]="{width:'560px', maxWidth:'95vw'}"
+  [header]="isEdit ? 'Editar jugador' : 'Nuevo jugador'"
+>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="p-fluid" novalidate>
+    <div class="grid">
+      <div class="col-12 md:col-8">
+        <label class="mb-2 block">Nombre Completo</label>
+        <input pInputText formControlName="nombreCompleto" placeholder="Nombre y apellido"
+               [class.p-invalid]="submitted && form.get('nombreCompleto')?.invalid" />
+        <small class="p-error" *ngIf="submitted && form.get('nombreCompleto')?.errors">Requerido</small>
+      </div>
+
+      <div class="col-12 md:col-4">
+        <label class="mb-2 block">Número</label>
+        <input pInputText type="number" formControlName="numero" placeholder="0-99"
+               [class.p-invalid]="submitted && form.get('numero')?.invalid" />
+        <small class="p-error" *ngIf="submitted && form.get('numero')?.errors">0 a 99</small>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <label class="mb-2 block">Posición</label>
+        <p-dropdown formControlName="posicion"
+                    [options]="posiciones"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Selecciona"
+                    [class.p-invalid]="submitted && form.get('posicion')?.invalid">
+        </p-dropdown>
+        <small class="p-error" *ngIf="submitted && form.get('posicion')?.errors">Requerido</small>
+      </div>
+
+      <div class="col-6 md:col-3">
+        <label class="mb-2 block">Estatura (cm)</label>
+        <input pInputText type="number" formControlName="estaturaCm" placeholder="Ej. 198"
+               [class.p-invalid]="submitted && form.get('estaturaCm')?.invalid" />
+        <small class="p-error" *ngIf="submitted && form.get('estaturaCm')?.errors">120–260</small>
+      </div>
+
+      <div class="col-6 md:col-3">
+        <label class="mb-2 block">Edad</label>
+        <input pInputText type="number" formControlName="edad" placeholder="Ej. 24"
+               [class.p-invalid]="submitted && form.get('edad')?.invalid" />
+        <small class="p-error" *ngIf="submitted && form.get('edad')?.errors">10–60</small>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <label class="mb-2 block">Nacionalidad</label>
+        <input pInputText formControlName="nacionalidad" placeholder="País"
+               [class.p-invalid]="submitted && form.get('nacionalidad')?.invalid" />
+        <small class="p-error" *ngIf="submitted && form.get('nacionalidad')?.errors">Requerido</small>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <label class="mb-2 block">Equipo</label>
+        <p-dropdown
+          formControlName="equipoId"
+          [options]="equipos"
+          optionLabel="nombre"
+          optionValue="id"
+          placeholder="Selecciona equipo"
+          [class.p-invalid]="submitted && form.get('equipoId')?.invalid">
+          <ng-template let-opt pTemplate="item">
+            <div class="flex align-items-center gap-2">
+              <img [src]="opt.logoUrl || 'assets/placeholder-team.svg'" class="logo" />
+              <span>{{ opt.nombre }}</span>
+            </div>
+          </ng-template>
+        </p-dropdown>
+        <small class="p-error" *ngIf="submitted && form.get('equipoId')?.errors">Requerido</small>
+      </div>
+    </div>
+
+    <div class="flex justify-content-end gap-2 mt-3">
+      <button pButton type="button" label="Cancelar" class="p-button-text" (click)="dialogVisible=false"></button>
+      <button pButton type="submit" label="Guardar" [disabled]="loading"></button>
+    </div>
+  </form>
+</p-dialog>

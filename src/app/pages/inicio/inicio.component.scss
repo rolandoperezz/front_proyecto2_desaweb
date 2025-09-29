@@ -1,0 +1,46 @@
+/* Topbar */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0,0,0,.06);
+}
+
+/* Sidebar responsiva */
+.sidebar {
+  min-height: calc(100vh - 56px); // alto menos topbar aprox.
+}
+
+/* Área de contenido */
+.content-wrapper {
+  min-height: calc(100vh - 56px - 2rem);
+}
+
+/* Utilidades */
+.logo {
+  letter-spacing: .3px;
+  font-size: 1.1rem;
+}
+
+/* Mejoras de PanelMenu */
+:host ::ng-deep .p-panelmenu .p-panelmenu-header > a {
+  border-radius: .7rem;
+}
+:host ::ng-deep .p-panelmenu .p-panelmenu-content {
+  border-radius: .7rem;
+}
+
+/* En pantallas pequeñas, el sidebar se vuelve overlay (lo ocultamos desde TS al seleccionar) */
+@media (max-width: 991px) {
+  .sidebar {
+    position: absolute;
+    width: 85%;
+    max-width: 320px;
+    height: calc(100vh - 56px);
+    overflow: auto;
+    z-index: 20;
+    border-top-right-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,.2);
+  }
+}
