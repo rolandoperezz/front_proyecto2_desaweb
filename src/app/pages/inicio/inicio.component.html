@@ -1,12 +1,16 @@
-<!-- Contenedor principal -->
 <div class="layout surface-ground min-h-screen">
 
-  <!-- Topbar -->
   <header class="topbar flex align-items-center justify-content-between px-3 py-2 surface-card">
     <div class="flex align-items-center gap-2">
-      <button pButton type="button" icon="pi pi-bars" class="p-button-text md:hidden"
-              (click)="toggleSidebar()"></button>
+      
       <div class="logo text-primary font-bold">Basquetbol WEB</div>
+      <button
+        pButton
+        type="button"
+        [icon]="sidebarOpen ? 'pi pi-bars' : 'pi pi-bars'"
+        class="p-button-text"
+        (click)="toggleSidebar()">
+      </button>
     </div>
 
     <div class="flex align-items-center gap-3">
@@ -17,29 +21,35 @@
     </div>
   </header>
 
-  <!-- Cuerpo: sidebar + contenido -->
-  <div class="body grid">
-    <!-- Sidebar -->
-    <aside class="col-12 md:col-3 lg:col-2 surface-card shadow-1 sidebar"
-           [class.hidden]="!sidebarOpen">
-      <div class="p-3">
-        <p-panelMenu [model]="items"></p-panelMenu>
-      </div>
-    </aside>
-
-    <!-- Contenido -->
-    <main class="col-12 md:col-9 lg:col-10 p-3">
-      <div class="surface-card border-round-xl shadow-1 p-3 content-wrapper">
-        <!-- Render dinámico del componente elegido -->
-        <ng-container *ngIf="activeKey as key">
-          <ng-container *ngComponentOutlet="componentsMap[key]"></ng-container>
-        </ng-container>
-
-        <!-- Fallback por si no hay mapeo -->
-        <div *ngIf="!activeKey || !componentsMap[activeKey]" class="text-700">
-          Selecciona una opción del menú.
-        </div>
-      </div>
-    </main>
+  <div
+    class="sidebar-backdrop"
+    *ngIf="isMobile && sidebarOpen"
+    (click)="closeSidebar()">
   </div>
+
+<div class="body shell">
+  <aside
+    class="surface-card shadow-1 sidebar transition"
+    [ngClass]="{
+      'sidebar--open': sidebarOpen,
+      'sidebar--mobile': isMobile
+    }">
+    <div class="p-3">
+      <p-panelMenu [model]="items"></p-panelMenu>
+    </div>
+  </aside>
+
+  <main class="main transition">
+    <div class="surface-card border-round-xl shadow-1 p-3 content-wrapper">
+      <ng-container *ngIf="activeKey as key">
+        <ng-container *ngComponentOutlet="componentsMap[key]"></ng-container>
+      </ng-container>
+
+      <div *ngIf="!activeKey || !componentsMap[activeKey]" class="text-700">
+        Selecciona una opción del menú.
+      </div>
+    </div>
+  </main>
+</div>
+
 </div>

@@ -25,7 +25,10 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageService } from 'primeng/api';
 import { DropdownModule } from 'primeng/dropdown';
-
+import { CalendarModule } from 'primeng/calendar';
+import { TagModule } from 'primeng/tag';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { InputNumberModule } from 'primeng/inputnumber';
 @NgModule({
   declarations: [
     EquiposComponent,
@@ -52,7 +55,11 @@ import { DropdownModule } from 'primeng/dropdown';
     ToastModule,
     ConfirmDialogModule,
     ProgressSpinnerModule,
-    DropdownModule
+    DropdownModule,
+    CalendarModule,
+    TagModule,
+    MultiSelectModule,
+    InputNumberModule
 
   ],
   providers: [MessageService]

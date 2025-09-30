@@ -1,46 +1,107 @@
-/* Topbar */
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  box-shadow: 0 4px 12px rgba(0,0,0,.06);
-}
-
-/* Sidebar responsiva */
 .sidebar {
-  min-height: calc(100vh - 56px); // alto menos topbar aprox.
+  grid-column: span 12; 
+  width: 260px;
+  min-height: calc(100vh - 56px);
+  border-right: 1px solid rgba(0,0,0,.06);
 }
 
-/* Área de contenido */
-.content-wrapper {
-  min-height: calc(100vh - 56px - 2rem);
-}
-
-/* Utilidades */
-.logo {
-  letter-spacing: .3px;
-  font-size: 1.1rem;
-}
-
-/* Mejoras de PanelMenu */
-:host ::ng-deep .p-panelmenu .p-panelmenu-header > a {
-  border-radius: .7rem;
-}
-:host ::ng-deep .p-panelmenu .p-panelmenu-content {
-  border-radius: .7rem;
-}
-
-/* En pantallas pequeñas, el sidebar se vuelve overlay (lo ocultamos desde TS al seleccionar) */
-@media (max-width: 991px) {
+@media (min-width: 992px) {
   .sidebar {
-    position: absolute;
-    width: 85%;
-    max-width: 320px;
-    height: calc(100vh - 56px);
-    overflow: auto;
-    z-index: 20;
-    border-top-right-radius: 1rem;
-    border-bottom-right-radius: 1rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,.2);
+    position: relative;
+    transform: translateX(0);
+  }
+  .sidebar:not(.sidebar--open) {
+    display: none; 
   }
 }
+
+.sidebar--mobile {
+  position: fixed;
+  top: 56px; 
+  left: 0;
+  height: calc(100vh - 56px);
+  z-index: 1001;
+  transform: translateX(-100%);
+}
+.sidebar--mobile.sidebar--open {
+  transform: translateX(0);
+}
+
+.transition {
+  transition: all .25s ease;
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 1000;
+}
+
+@media (min-width: 992px) {
+  main.transition {
+    transition: width .25s ease, margin .25s ease;
+  }
+}
+
+.shell {
+  display: flex;
+  min-height: calc(100vh - 56px);
+  position: relative;
+}
+
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  border-right: 1px solid rgba(0,0,0,.06);
+}
+
+.main {
+  flex: 1 1 auto;
+  min-width: 0;          
+  padding: 1rem;
+}
+
+.transition {
+  transition: all .25s ease;
+}
+
+.sidebar--mobile {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  height: calc(100vh - 56px);
+  z-index: 1001;
+  transform: translateX(-100%);
+}
+
+.sidebar--mobile.sidebar--open {
+  transform: translateX(0);
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 1000;
+}
+
+@media (min-width: 992px) {
+  .sidebar {
+    position: sticky;
+    top: 56px; 
+    height: calc(100vh - 56px);
+  }
+
+  .sidebar:not(.sidebar--mobile):not(.sidebar--open) {
+    display: none;
+  }
+}
+
+/* Opcional: evita que el contenido haga scroll de toda la página si es muy largo */
+.content-wrapper {
+  /* Si quieres un contenedor scroll interno: */
+  /* max-height: calc(100vh - 56px - 2rem); */
+  /* overflow: auto; */
+}
+

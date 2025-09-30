@@ -32,6 +32,28 @@ export interface JugadorDto {
   equipo?: EquipoDto;
 }
 
+export interface PartidoDto {
+  id: number;
+  fechaHora: string; // ISO
+  marcadorLocal: number;
+  marcadorVisitante: number;
+  equipoLocal: EquipoDto;
+  equipoVisitante: EquipoDto;
+  rosterLocal?: JugadorDto[];
+  rosterVisitante?: JugadorDto[];
+}
+
+export interface PartidoUpsert {
+  fechaHora: string;       // ISO
+  equipoLocalId: number;
+  equipoVisitanteId: number;
+}
+
+export interface MarcadorDto {
+  marcadorLocal: number;
+  marcadorVisitante: number;
+}
+
 
 @Injectable({
   providedIn: 'root'
@@ -116,4 +138,68 @@ export class ConsultasService {
       responseType: 'text' as 'json'
     });
   }
+
+
+  //Partidos
+  listP(startDate?: string, endDate?: string): Observable<PartidoDto[]> {
+    let params = new HttpParams();
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate)   params = params.set('endDate', endDate);
+    return this.http.get<PartidoDto[]>(`${this.baseUrl}/api/Admin/partidos`, { params });
+  }
+
+  getP(id: number): Observable<PartidoDto> {
+    return this.http.get<PartidoDto>(`${this.baseUrl}/api/Admin/partidos/${id}`);
+  }
+
+  createP(payload: PartidoUpsert) {
+    return this.http.post<string>(`${this.baseUrl}/api/Admin/partidos`, payload, {
+      responseType: 'text' as 'json' // text/plain en backend
+    });
+  }
+
+  updateP(id: number, payload: PartidoUpsert) {
+    return this.http.put<string>(`${this.baseUrl}/api/Admin/partidos/${id}`, payload, {
+      responseType: 'text' as 'json'
+    });
+  }
+
+  deleteP(id: number) {
+    return this.http.delete<string>(`${this.baseUrl}/api/Admin/partidos/${id}`, {
+      responseType: 'text' as 'json'
+    });
+  }
+
+  setRoster(partidoId: number, equipoId: number, jugadorIds: number[]) {
+    return this.http.post<string>(`${this.baseUrl}/api/Admin/partidos/${partidoId}/roster/equipo/${equipoId}`, jugadorIds, {
+      responseType: 'text' as 'json'
+    });
+  }
+
+  updateScore(id: number, payload: MarcadorDto) {
+    return this.http.put<string>(`${this.baseUrl}/api/Admin/partidos/${id}/marcador`, payload, {
+      responseType: 'text' as 'json'
+    });
+  }
+
+
+  //publicos
+        listPublicPartidos(startDate?: string, endDate?: string) {
+        let params = new HttpParams();
+        if (startDate) params = params.set('startDate', startDate);
+        if (endDate)   params = params.set('endDate', endDate);
+        return this.http.get<PartidoDto[]>(`${this.baseUrl}/api/Partidos`, { params });
+      }
+
+      // Detalle público por id
+      getPublicPartido(id: number) {
+        return this.http.get<PartidoDto>(`${this.baseUrl}/api/Partidos/${id}`);
+      }
+
+      // Actualizar marcador (público)
+      updatePublicScore(id: number, payload: MarcadorDto) {
+        return this.http.put<string>(`${this.baseUrl}/api/Partidos/${id}/marcador`, payload, {
+          responseType: 'text' as 'json'
+        });
+      }
 }

@@ -1,1 +1,249 @@
-<p>verpartidos works!</p>
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<!-- ====================== VISTA LISTA ====================== -->
+<div *ngIf="viewMode === 'list'" class="grid">
+  <div class="col-12">
+    <div class="surface-card border-round-xl p-3 mb-3 shadow-1">
+      <form [formGroup]="formFiltros" class="grid align-items-end">
+        <div class="col-12 md:col-4">
+          <label class="block text-700 mb-2">Inicio</label>
+          <p-calendar formControlName="startDate" [showIcon]="true" [showTime]="true" hourFormat="24" dateFormat="yy-mm-dd"></p-calendar>
+        </div>
+        <div class="col-12 md:col-4">
+          <label class="block text-700 mb-2">Fin</label>
+          <p-calendar formControlName="endDate" [showIcon]="true" [showTime]="true" hourFormat="24" dateFormat="yy-mm-dd"></p-calendar>
+        </div>
+        <div class="col-12 md:col-4 flex gap-2 justify-content-end mt-3 md:mt-0">
+          <button pButton type="button" icon="pi pi-search" label="Buscar" (click)="load()"></button>
+          <button pButton type="button" icon="pi pi-filter-slash" label="Limpiar" class="p-button-text" (click)="resetFilters()"></button>
+        </div>
+      </form>
+    </div>
+
+    <p-table
+      #dt
+      [value]="partidos"
+      dataKey="id"
+      [loading]="loading"
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[10,25,50]"
+      [globalFilterFields]="['equipoLocal.nombre','equipoVisitante.nombre','fechaHora']"
+      responsiveLayout="scroll"
+      class="shadow-1 border-round-xl"
+    >
+      <ng-template pTemplate="caption">
+        <div class="flex align-items-center gap-2 w-full">
+          <span class="text-900 font-semibold">Partidos</span>
+          <span class="flex-1"></span>
+          <span class="p-input-icon-left w-20rem max-w-full">
+            <i class="pi pi-search"></i>
+            <input pInputText type="text" (input)="onGlobalFilter($event)" placeholder="Filtrar en tabla" />
+          </span>
+          <!-- <button pButton type="button" label="Limpiar" icon="pi pi-filter-slash" class="p-button-text"
+                  (click)="dt.clear()"></button> -->
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="fechaHora">Fecha / Hora <p-sortIcon field="fechaHora"></p-sortIcon></th>
+          <th pSortableColumn="equipoLocal.nombre">Local <p-sortIcon field="equipoLocal.nombre"></p-sortIcon></th>
+          <th pSortableColumn="equipoVisitante.nombre">Visitante <p-sortIcon field="equipoVisitante.nombre"></p-sortIcon></th>
+          <th>Marcador</th>
+          <th style="width: 100px"></th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-r>
+        <tr>
+          <td>{{ fmtDate(r.fechaHora) }}</td>
+          <td>
+            <div class="flex align-items-center gap-2">
+              <img [src]="r.equipoLocal?.logoUrl || 'assets/placeholder-team.svg'" class="logo" />
+              <span>{{ r.equipoLocal?.nombre }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="flex align-items-center gap-2">
+              <img [src]="r.equipoVisitante?.logoUrl || 'assets/placeholder-team.svg'" class="logo" />
+              <span>{{ r.equipoVisitante?.nombre }}</span>
+            </div>
+          </td>
+          <td><p-tag [value]="(r.marcadorLocal ?? 0) + ' - ' + (r.marcadorVisitante ?? 0)"></p-tag></td>
+          <td class="text-right">
+            <button pButton icon="pi pi-eye" class="p-button-text p-button-sm" label="Abrir" (click)="openDetail(r)"></button>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr><td colspan="5" class="text-center text-600">Sin partidos.</td></tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
+
+<!-- ====================== VISTA DETALLE ====================== -->
+<div *ngIf="viewMode === 'detail' && selected" class="grid">
+  <div class="col-12">
+    <div class="surface-card border-round-xl p-3 shadow-1">
+      <div class="flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        <button pButton type="button" icon="pi pi-arrow-left" label="Regresar a la lista" class="p-button-text" (click)="goToList()"></button>
+
+      </div>
+      <div class="flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+        
+        <div class="flex align-items-center gap-2">
+          <img [src]="selected?.equipoLocal?.logoUrl || 'assets/placeholder-team.svg'" class="logo-lg" />
+          <h3 class="m-0">{{ selected?.equipoLocal?.nombre }}</h3>
+        </div>
+
+        <div class="scoreboard">
+          <span class="score">{{ marcadorLocal }}</span>
+          <span class="divider">-</span>
+          <span class="score">{{ marcadorVisitante }}</span>
+        </div>
+
+        <div class="flex align-items-center gap-2">
+          <h3 class="m-0">{{ selected?.equipoVisitante?.nombre }}</h3>
+          <img [src]="selected?.equipoVisitante?.logoUrl || 'assets/placeholder-team.svg'" class="logo-lg" />
+        </div>
+      </div>
+
+      <div class="grid">
+        <!-- Controles de puntuación -->
+        <div class="col-12 md:col-6">
+          <div class="surface-100 border-round p-2 mb-2">Local</div>
+          <div class="flex gap-2 flex-wrap">
+            <button pButton label="+1" (click)="addPoints('L', 1)"></button>
+            <button pButton label="+2" (click)="addPoints('L', 2)"></button>
+            <button pButton label="+3" (click)="addPoints('L', 3)"></button>
+            <button pButton class="p-button-text" label="−1" (click)="addPoints('L', -1)"></button>
+          </div>
+        </div>
+        <div class="col-12 md:col-6">
+          <div class="surface-100 border-round p-2 mb-2">Visitante</div>
+          <div class="flex gap-2 flex-wrap">
+            <button pButton label="+1" (click)="addPoints('V', 1)"></button>
+            <button pButton label="+2" (click)="addPoints('V', 2)"></button>
+            <button pButton label="+3" (click)="addPoints('V', 3)"></button>
+            <button pButton class="p-button-text" label="−1" (click)="addPoints('V', -1)"></button>
+          </div>
+        </div>
+
+        <!-- Timer y Cuartos -->
+        <div class="col-12">
+          <div class="surface-100 border-round p-3 mt-3">
+            <div class="flex align-items-center justify-content-between flex-wrap gap-2">
+              <div class="flex align-items-center gap-2">
+                <span class="text-700">Cuarto:</span>
+               <div class="flex align-items-center gap-2">
+<button
+  pButton
+  [label]="'1º'"
+  [ngClass]="{
+    'p-button-primary': quarter === 1,
+    'p-button-secondary p-button-outlined': quarter !== 1
+  }"
+  (click)="setQuarter(1)">
+</button>
+
+<button
+  pButton
+  [label]="'2º'"
+  [ngClass]="{
+    'p-button-primary': quarter === 2,
+    'p-button-secondary p-button-outlined': quarter !== 2
+  }"
+  (click)="setQuarter(2)">
+</button>
+
+<button
+  pButton
+  [label]="'3º'"
+  [ngClass]="{
+    'p-button-primary': quarter === 3,
+    'p-button-secondary p-button-outlined': quarter !== 3
+  }"
+  (click)="setQuarter(3)">
+</button>
+
+<button
+  pButton
+  [label]="'4º'"
+  [ngClass]="{
+    'p-button-primary': quarter === 4,
+    'p-button-secondary p-button-outlined': quarter !== 4
+  }"
+  (click)="setQuarter(4)">
+</button>
+
+<button
+  pButton
+  [label]="'OT'"
+  [ngClass]="{
+    'p-button-primary': quarter >= 5,
+    'p-button-secondary p-button-outlined': quarter < 5
+  }"
+  (click)="setQuarter(5)">
+</button>
+
+</div>
+
+              </div>
+
+              <div class="timer">{{ timeMMSS() }}</div>
+
+              <div class="flex gap-2">
+                <button pButton icon="pi pi-play" label="Inicio" (click)="startTimer()" [disabled]="running"></button>
+                <button pButton icon="pi pi-pause" label="Pausa" class="p-button-secondary" (click)="pauseTimer()" [disabled]="!running"></button>
+                <button pButton icon="pi pi-replay" label="Reiniciar" class="p-button-text" (click)="resetTimer()"></button>
+              </div>
+            </div>
+
+            <div class="flex align-items-center gap-2 mt-3">
+              <span class="text-700">Minutos por cuarto:</span>
+              <p-inputNumber [min]="1" [max]="15" [(ngModel)]="quarterMinutes" (onInput)="setMinutesPerQuarter(quarterMinutes)"></p-inputNumber>
+            </div>
+          </div>
+          <div class="flex gap-2 justify-content-end mt-3">
+  <button pButton type="button" icon="pi pi-step-forward" label="Siguiente cuarto"
+          (click)="requestNextQuarter()" [disabled]="running"></button>
+
+  <button pButton type="button" icon="pi pi-flag" class="p-button-danger"
+          label="Finalizar partido" (click)="finalizeMatch()" [disabled]="running"></button>
+</div>
+        </div>
+
+        <!-- Rosters -->
+        <div class="col-12 md:col-6">
+          <div class="surface-100 border-round p-2 mb-2">Jugadores {{selected?.equipoLocal?.nombre}}</div>
+          <ul class="roster">
+            <li *ngFor="let j of (selected?.rosterLocal || [])">
+              <span>#{{ j.numero }}</span>
+              <span>{{ j.nombreCompleto }}</span>
+              <span>{{ j.posicion }}</span>
+
+            </li>
+          </ul>
+        </div>
+        <div class="col-12 md:col-6">
+          <div class="surface-100 border-round p-2 mb-2">Jugadores {{selected?.equipoVisitante?.nombre}}</div>
+          <ul class="roster">
+            <li *ngFor="let j of (selected?.rosterVisitante || [])">
+              <span>#{{ j.numero }}</span>
+              <span>{{ j.nombreCompleto }}</span>
+              <span>{{ j.posicion }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="col-12 mt-3 flex justify-content-end gap-2">
+          <!-- <button pButton type="button" label="Guardar marcador" icon="pi pi-save" (click)="saveScore()"></button> -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

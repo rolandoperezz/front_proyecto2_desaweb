@@ -1,4 +1,4 @@
-import { Component, OnInit, Type } from '@angular/core';
+import { Component, OnInit, Type, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { MenuItem } from 'primeng/api';
 
@@ -13,14 +13,16 @@ import { VerpartidosComponent } from '../verpartidos/verpartidos.component';
   styleUrls: ['./inicio.component.scss']
 })
 export class InicioComponent implements OnInit {
-  role: string | null = null;
+ role: string | null = null;
   username: string | null = null;
 
-  sidebarOpen = true;
+  // estado del sidebar
+  sidebarOpen = true;         // visible u oculto
+  isMobile = false;           // ayuda para comportamiento overlay en móvil
+
   items: MenuItem[] = [];
   activeKey: string | null = null;
 
-  /** Registro: clave -> componente a renderizar */
   componentsMap: Record<string, Type<any>> = {
     equipos: EquiposComponent,
     jugadores: JugadoresComponent,
@@ -32,52 +34,63 @@ export class InicioComponent implements OnInit {
 
   ngOnInit(): void {
     const token = localStorage.getItem('token');
-    if (!token) {
-      this.router.navigateByUrl('/login');
-      return;
-    }
+    if (!token) { this.router.navigateByUrl('/login'); return; }
 
     this.role = (localStorage.getItem('role') || '').trim();
     this.username = localStorage.getItem('username') || 'Invitado';
 
+    this.isMobile = window.innerWidth < 992; // ~ md breakpoint
+    this.sidebarOpen = !this.isMobile;       // por defecto: abierto en desktop, oculto en móvil
     this.buildMenu();
+  }
+
+  @HostListener('window:resize')
+  onResize() {
+    this.isMobile = window.innerWidth < 992;
+    if (!this.isMobile) {
+      // en desktop deja el estado como esté; si vienes de móvil cerrado, puedes querer abrirlo
+      // quítalo si prefieres mantener el estado
+    }
   }
 
   private buildMenu() {
     const admin = this.role?.toLowerCase() === 'administrador';
 
-    if (admin) {
-      this.items = [
-        {
-          label: 'Administración',
-          items: [
-            { label: 'Equipos',   icon: 'pi pi-sitemap',    command: () => this.select('equipos') },
-            { label: 'Jugadores', icon: 'pi pi-users',      command: () => this.select('jugadores') },
-            { label: 'Partidos',  icon: 'pi pi-list-check', command: () => this.select('partidos') },
-          ]
-        }
-      ];
-      this.activeKey = 'equipos';
-    } else {
-      this.items = [
-        {
-          label: 'Menú',
-          items: [
-            { label: 'Ver Partidos', icon: 'pi pi-calendar', command: () => this.select('verPartidos') }
-          ]
-        }
-      ];
-      this.activeKey = 'verPartidos';
-    }
+    const comunes: MenuItem[] = [
+      {
+        label: 'Menu',
+        items: [
+          { label: 'Ver Partidos', icon: 'pi pi-calendar', command: () => this.select('verPartidos') },
+        ]
+      }
+    ];
+
+    const adminItems: MenuItem[] = admin ? [
+      {
+        label: 'Administración',
+        items: [
+          { label: 'Equipos',    icon: 'pi pi-sitemap',    command: () => this.select('equipos') },
+          { label: 'Jugadores',  icon: 'pi pi-users',      command: () => this.select('jugadores') },
+          { label: 'Partidos',   icon: 'pi pi-list-check', command: () => this.select('partidos') },
+        ]
+      }
+    ] : [];
+
+    this.items = admin ? adminItems : comunes;
+    this.activeKey = admin ? 'equipos' : 'verPartidos';
   }
 
   select(key: string) {
     this.activeKey = key;
-    if (window.innerWidth < 992) this.sidebarOpen = false;
+    if (this.isMobile) this.sidebarOpen = false; // cierra al elegir en móvil
   }
 
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  closeSidebar() {
+    if (this.isMobile) this.sidebarOpen = false;
   }
 
   logout() {

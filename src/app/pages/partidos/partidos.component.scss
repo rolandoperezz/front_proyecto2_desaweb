@@ -1,0 +1,12 @@
+.logo {
+  width: 28px;
+  height: 28px;
+  object-fit: cover;
+  border-radius: .5rem;
+  border: 1px solid rgba(0,0,0,.08);
+}
+
+:host ::ng-deep .p-table {
+  border-radius: 1rem;
+  overflow: hidden;
+}

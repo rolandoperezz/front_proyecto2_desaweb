@@ -1,6 +1,5 @@
 <p-toast></p-toast>
 
-<!-- Lienzo centrado con PrimeFlex -->
 <div class="min-h-screen surface-ground flex align-items-center justify-content-center px-3 py-5">
   <div class="w-full" style="max-width: 460px">
     <p-card class="shadow-5 border-round-2xl overflow-hidden">
@@ -10,14 +9,13 @@
             <i class="pi pi-shield text-0"></i>
           </span>
           <div class="flex flex-column">
-            <span class="font-semibold text-900">Ingreso al sistema</span>
+            <span class="font-semibold text-900">Ingreso</span>
             <small class="text-600">Panel de administración</small>
           </div>
         </div>
       </ng-template>
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="p-fluid" novalidate>
-        <!-- Usuario -->
         <div class="field">
           <label for="username" class="block mb-2 text-900 font-medium">Usuario</label>
           <div class="p-inputgroup">
@@ -37,7 +35,6 @@
           </small>
         </div>
 
-        <!-- Contraseña -->
        <div class="field">
   <label for="password" class="block mb-2 text-900 font-medium">Contraseña</label>
 
@@ -46,7 +43,6 @@
       <i class="pi pi-lock"></i>
     </span>
 
-    <!-- Nota: usamos inputStyleClass para dar estilo al INPUT interno -->
    <input
              pInputText
               type="password"
@@ -63,16 +59,7 @@
 </div>
 
 
-        <!-- Utilidades -->
-        <div class="flex align-items-center justify-content-between mb-3">
-          <!-- <div class="flex align-items-center gap-2">
-            <p-inputSwitch [(ngModel)]="remember" name="remember"></p-inputSwitch>
-            <span class="text-700">Recordarme</span>
-          </div> -->
-          <a class="text-600 hover:text-800" href="#" (click)="$event.preventDefault()">¿Olvidaste tu contraseña?</a>
-        </div>
 
-        <!-- Botón -->
         <button
           pButton
           type="submit"
@@ -81,7 +68,6 @@
           [disabled]="loading">
         </button>
 
-        <!-- Loading -->
         <div class="flex justify-content-center mt-3" *ngIf="loading">
           <p-progressSpinner styleClass="w-2rem h-2rem"></p-progressSpinner>
         </div>

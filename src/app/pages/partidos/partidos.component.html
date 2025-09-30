@@ -1,1 +1,242 @@
-<p>partidos works!</p>
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<!-- Filtros superiores (rango de fechas) -->
+<div class="surface-card border-round-xl p-3 mb-3 shadow-1">
+  <form [formGroup]="formFiltros" class="grid align-items-end">
+    <div class="col-12 md:col-4">
+      <label class="block text-700 mb-2">Fecha inicio</label>
+      <p-calendar formControlName="startDate" [showIcon]="true" [showTime]="true" hourFormat="24" dateFormat="yy-mm-dd"></p-calendar>
+    </div>
+    <div class="col-12 md:col-4">
+      <label class="block text-700 mb-2">Fecha fin</label>
+      <p-calendar formControlName="endDate" [showIcon]="true" [showTime]="true" hourFormat="24" dateFormat="yy-mm-dd"></p-calendar>
+    </div>
+    <div class="col-12 md:col-4 flex gap-2 justify-content-end mt-3 md:mt-0">
+      <button pButton type="button" icon="pi pi-search" label="Buscar" (click)="load()"></button>
+      <button pButton type="button" icon="pi pi-filter-slash" label="Limpiar" class="p-button-text" (click)="resetFilters()"></button>
+      <button pButton type="button" icon="pi pi-plus" label="Nuevo" (click)="openNew()"></button>
+    </div>
+  </form>
+</div>
+
+<!-- Tabla -->
+<p-table
+  #dt
+  [value]="partidos"
+  dataKey="id"
+  [loading]="loading"
+  [paginator]="true"
+  [rows]="10"
+  [rowsPerPageOptions]="[10,25,50]"
+  [globalFilterFields]="['equipoLocal.nombre','equipoVisitante.nombre','marcadorLocal','marcadorVisitante','fechaHora']"
+  responsiveLayout="scroll"
+  class="shadow-1 border-round-xl"
+>
+  <!-- caption con filtro global client-side -->
+  <ng-template pTemplate="caption">
+    <div class="flex align-items-center gap-2 w-full">
+      <span class="text-900 font-semibold">Partidos</span>
+      <span class="flex-1"></span>
+      <span class="p-input-icon-left w-20rem max-w-full">
+        <i class="pi pi-search"></i>
+        <input
+          pInputText
+          type="text"
+          [value]="formFiltros.value.search"
+          (input)="onGlobalFilterInput($event, dt)"
+          placeholder="Filtrar en tabla" />
+      </span>
+      <button pButton type="button" label="Limpiar" icon="pi pi-filter-slash" class="p-button-text"
+              (click)="dt.clear(); formFiltros.patchValue({search:''})"></button>
+    </div>
+  </ng-template>
+
+  <!-- encabezado con filtros por columna -->
+  <ng-template pTemplate="header">
+    <tr>
+      <th pSortableColumn="fechaHora">Fecha / Hora <p-sortIcon field="fechaHora"></p-sortIcon></th>
+      <th pSortableColumn="equipoLocal.nombre">Local <p-sortIcon field="equipoLocal.nombre"></p-sortIcon></th>
+      <th pSortableColumn="equipoVisitante.nombre">Visitante <p-sortIcon field="equipoVisitante.nombre"></p-sortIcon></th>
+      <th pSortableColumn="marcadorLocal">Marcador <p-sortIcon field="marcadorLocal"></p-sortIcon></th>
+      <th style="width: 220px" class="text-center">Acciones</th>
+    </tr>
+    <tr>
+      <th>
+        <p-columnFilter type="date" field="fechaHora" display="menu" placeholder="Fecha"></p-columnFilter>
+      </th>
+      <th>
+        <p-columnFilter type="text" field="equipoLocal.nombre" display="menu" placeholder="Local"></p-columnFilter>
+      </th>
+      <th>
+        <p-columnFilter type="text" field="equipoVisitante.nombre" display="menu" placeholder="Visitante"></p-columnFilter>
+      </th>
+      <th>
+        <p-columnFilter type="numeric" field="marcadorLocal" display="menu" placeholder="Goles"></p-columnFilter>
+      </th>
+      <th></th>
+    </tr>
+  </ng-template>
+
+  <!-- cuerpo -->
+  <ng-template pTemplate="body" let-r>
+    <tr>
+      <td>
+        <div class="text-700">{{ r.fechaHora | date:'dd/MM/yyyy'}}</div>
+      </td>
+      <td>
+        <div class="flex align-items-center gap-2">
+          <img [src]="r.equipoLocal?.logoUrl || 'assets/placeholder-team.svg'" class="logo" />
+          <span>{{ r.equipoLocal?.nombre }}</span>
+        </div>
+      </td>
+      <td>
+        <div class="flex align-items-center gap-2">
+          <img [src]="r.equipoVisitante?.logoUrl || 'assets/placeholder-team.svg'" class="logo" />
+          <span>{{ r.equipoVisitante?.nombre }}</span>
+        </div>
+      </td>
+      <td>
+        <p-tag [value]="r.marcadorLocal + ' - ' + r.marcadorVisitante"></p-tag>
+      </td>
+      <td class="text-center">
+        <div class="flex gap-2 justify-content-center flex-wrap">
+          <button pButton icon="pi pi-users" class="p-button-text p-button-sm" label="Roster L"
+                  (click)="openRoster(r, true)"></button>
+          <button pButton icon="pi pi-users" class="p-button-text p-button-sm" label="Roster V"
+                  (click)="openRoster(r, false)"></button>
+          <button pButton icon="pi pi-sliders-h" class="p-button-text p-button-sm" label="Marcador"
+                  (click)="openScore(r)"></button>
+          <button pButton icon="pi pi-pencil" class="p-button-text p-button-sm" (click)="openEdit(r)"></button>
+          <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" (click)="askDelete(r)"></button>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr><td colspan="5" class="text-center text-600">Sin partidos.</td></tr>
+  </ng-template>
+</p-table>
+
+<!-- Diálogo crear/editar -->
+<p-dialog
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [draggable]="false"
+  [style]="{width:'560px', maxWidth:'95vw'}"
+  [header]="isEdit ? 'Editar partido' : 'Nuevo partido'">
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="p-fluid" novalidate>
+    <div class="grid">
+      <div class="col-12">
+        <label class="mb-2 block">Fecha y hora</label>
+        <p-calendar
+          formControlName="fechaHora"
+          appendTo="body"
+          [showIcon]="true"
+          [showTime]="true"
+          hourFormat="24"
+          dateFormat="yy-mm-dd"
+          [class.p-invalid]="submitted && form.get('fechaHora')?.invalid">
+        </p-calendar>
+        <small class="p-error" *ngIf="submitted && form.get('fechaHora')?.errors">Requerido</small>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <label class="mb-2 block">Equipo Local</label>
+        <p-dropdown
+          formControlName="equipoLocalId"
+          [options]="equipos"
+          optionLabel="nombre"
+          optionValue="id"
+          placeholder="Selecciona"
+          [class.p-invalid]="submitted && form.get('equipoLocalId')?.invalid">
+          <ng-template let-opt pTemplate="item">
+            <div class="flex align-items-center gap-2">
+              <img [src]="opt.logoUrl || 'assets/placeholder-team.svg'" class="logo" />
+              <span>{{ opt.nombre }}</span>
+            </div>
+          </ng-template>
+        </p-dropdown>
+        <small class="p-error" *ngIf="submitted && form.get('equipoLocalId')?.errors">Requerido</small>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <label class="mb-2 block">Equipo Visitante</label>
+        <p-dropdown
+          formControlName="equipoVisitanteId"
+          [options]="equipos"
+          optionLabel="nombre"
+          optionValue="id"
+          placeholder="Selecciona"
+          [class.p-invalid]="submitted && form.get('equipoVisitanteId')?.invalid">
+          <ng-template let-opt pTemplate="item">
+            <div class="flex align-items-center gap-2">
+              <img [src]="opt.logoUrl || 'assets/placeholder-team.svg'" class="logo" />
+              <span>{{ opt.nombre }}</span>
+            </div>
+          </ng-template>
+        </p-dropdown>
+        <small class="p-error" *ngIf="submitted && form.get('equipoVisitanteId')?.errors">Requerido</small>
+      </div>
+    </div>
+
+    <div class="flex justify-content-end gap-2 mt-3">
+      <button pButton type="button" label="Cancelar" class="p-button-text" (click)="dialogVisible=false"></button>
+      <button pButton type="submit" label="Guardar"></button>
+    </div>
+  </form>
+</p-dialog>
+
+<!-- Diálogo marcador -->
+<p-dialog
+  [(visible)]="scoreVisible"
+  [modal]="true"
+  [style]="{width:'420px', maxWidth:'95vw'}"
+  header="Actualizar marcador"
+  [draggable]="false">
+
+  <form [formGroup]="formScore" class="p-fluid">
+    <div class="grid">
+      <div class="col-6">
+        <label class="mb-2 block">Local</label>
+        <input pInputText type="number" formControlName="marcadorLocal"
+               [class.p-invalid]="formScore.get('marcadorLocal')?.invalid" />
+      </div>
+      <div class="col-6">
+        <label class="mb-2 block">Visitante</label>
+        <input pInputText type="number" formControlName="marcadorVisitante"
+               [class.p-invalid]="formScore.get('marcadorVisitante')?.invalid" />
+      </div>
+    </div>
+    <div class="flex justify-content-end gap-2 mt-3">
+      <button pButton type="button" label="Cancelar" class="p-button-text" (click)="scoreVisible=false"></button>
+      <button pButton type="button" label="Guardar" (click)="saveScore()"></button>
+    </div>
+  </form>
+</p-dialog>
+
+<!-- Diálogo roster -->
+<p-dialog
+  [(visible)]="rosterVisible"
+  [modal]="true"
+  [style]="{width:'560px', maxWidth:'95vw'}"
+  [header]="rosterForLocal ? 'Roster Equipo Local' : 'Roster Equipo Visitante'"
+  [draggable]="false">
+
+  <div class="p-fluid">
+    <p-multiSelect
+      [options]="rosterOptions"
+      [(ngModel)]="selectedRosterIds"
+      appendTo="body"
+      defaultLabel="Selecciona jugadores"
+      display="chip">
+    </p-multiSelect>
+
+    <div class="flex justify-content-end gap-2 mt-3">
+      <button pButton type="button" label="Cancelar" class="p-button-text" (click)="rosterVisible=false"></button>
+      <button pButton type="button" label="Guardar" (click)="saveRoster()"></button>
+    </div>
+  </div>
+</p-dialog>
