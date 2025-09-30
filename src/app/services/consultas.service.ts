@@ -60,7 +60,7 @@ export interface MarcadorDto {
 })
 export class ConsultasService {
 
-  // private baseUrl = 'http://localhost:5062'; 
+  // private baseUrl = 'http://localhost:5062';
   private baseUrl = '/api'; 
 
 
