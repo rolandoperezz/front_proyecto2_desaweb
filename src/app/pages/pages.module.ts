@@ -29,6 +29,8 @@ import { CalendarModule } from 'primeng/calendar';
 import { TagModule } from 'primeng/tag';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { RolesComponent } from './roles/roles.component';
+import { UsuariosComponent } from './usuarios/usuarios.component';
 @NgModule({
   declarations: [
     EquiposComponent,
@@ -37,6 +39,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
     JugadoresComponent,
     InicioComponent,
     VerpartidosComponent,
+    RolesComponent,
+    UsuariosComponent,
   ],
   imports: [
     CommonModule,

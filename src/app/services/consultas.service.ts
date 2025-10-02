@@ -54,20 +54,31 @@ export interface MarcadorDto {
   marcadorVisitante: number;
 }
 
+export interface RoleDto {
+  id: number;
+  name: string;
+}
+
+export interface UserDto {
+  id?: number;
+  username: string;
+  roleId: number;
+  roleName?: string;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConsultasService {
 
-  // private baseUrl = 'http://localhost:5062';
+  // private baseUrl = 'http://localhost:5062/api';
   private baseUrl = '/api'; 
 
 
   constructor(private http: HttpClient) {}
 
   login(payload: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.baseUrl}/api/Auth/login`, payload).pipe(
+    return this.http.post<LoginResponse>(`${this.baseUrl}/Auth/login`, payload).pipe(
       tap(res => {
         localStorage.setItem('token', res.token);
         if (res.role?.name) localStorage.setItem('role', res.role.name);
@@ -87,25 +98,25 @@ export class ConsultasService {
     let params = new HttpParams();
     if (searchTerm) params = params.set('searchTerm', searchTerm);
     if (cityFilter) params = params.set('cityFilter', cityFilter);
-    return this.http.get<EquipoDto[]>(`${this.baseUrl}/api/Admin/equipos`, { params });
+    return this.http.get<EquipoDto[]>(`${this.baseUrl}/Admin/equipos`, { params });
   }
 
   get(id: number): Observable<EquipoDto> {
-    return this.http.get<EquipoDto>(`${this.baseUrl}/api/Admin/equipos/${id}`);
+    return this.http.get<EquipoDto>(`${this.baseUrl}/Admin/equipos/${id}`);
   }
 
   create(payload: Omit<EquipoDto, 'id'>): Observable<EquipoDto> {
-    return this.http.post<EquipoDto>(`${this.baseUrl}/api/Admin/equipos`, payload);
+    return this.http.post<EquipoDto>(`${this.baseUrl}/Admin/equipos`, payload);
   }
 
   update(id: number, payload: Omit<EquipoDto, 'id'>): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/api/Admin/equipos/${id}`, payload, {
+    return this.http.put<void>(`${this.baseUrl}/Admin/equipos/${id}`, payload, {
     responseType: 'text' as 'json'   
   });
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/api/Admin/equipos/${id}`, {
+    return this.http.delete<void>(`${this.baseUrl}/Admin/equipos/${id}`, {
     responseType: 'text' as 'json'  
   });
   }
@@ -113,30 +124,30 @@ export class ConsultasService {
 
   //Jugadores
    getById(id: number): Observable<JugadorDto> {
-    return this.http.get<JugadorDto>(`${this.baseUrl}/api/Admin/jugadores/${id}`);
+    return this.http.get<JugadorDto>(`${this.baseUrl}/Admin/jugadores/${id}`);
   }
 
   listByEquipo(equipoId: number, searchTerm?: string, positionFilter?: string): Observable<JugadorDto[]> {
     let params = new HttpParams();
     if (searchTerm) params = params.set('searchTerm', searchTerm);
     if (positionFilter) params = params.set('cityFilter', positionFilter);
-    return this.http.get<JugadorDto[]>(`${this.baseUrl}/api/Admin/equipos/${equipoId}/jugadores`, { params });
+    return this.http.get<JugadorDto[]>(`${this.baseUrl}/Admin/equipos/${equipoId}/jugadores`, { params });
   }
 
   createJ(payload: Omit<JugadorDto, 'id' | 'equipo'>) {
-    return this.http.post<string>(`${this.baseUrl}/api/Admin/jugadores`, payload, {
+    return this.http.post<string>(`${this.baseUrl}/Admin/jugadores`, payload, {
       responseType: 'text' as 'json' 
     });
   }
 
   updateJ(id: number, payload: Omit<JugadorDto, 'id' | 'equipo'>) {
-    return this.http.put<string>(`${this.baseUrl}/api/Admin/jugadores/${id}`, payload, {
+    return this.http.put<string>(`${this.baseUrl}/Admin/jugadores/${id}`, payload, {
       responseType: 'text' as 'json'
     });
   }
 
   deleteJ(id: number) {
-    return this.http.delete<string>(`${this.baseUrl}/api/Admin/jugadores/${id}`, {
+    return this.http.delete<string>(`${this.baseUrl}/Admin/jugadores/${id}`, {
       responseType: 'text' as 'json'
     });
   }
@@ -147,39 +158,39 @@ export class ConsultasService {
     let params = new HttpParams();
     if (startDate) params = params.set('startDate', startDate);
     if (endDate)   params = params.set('endDate', endDate);
-    return this.http.get<PartidoDto[]>(`${this.baseUrl}/api/Admin/partidos`, { params });
+    return this.http.get<PartidoDto[]>(`${this.baseUrl}/Admin/partidos`, { params });
   }
 
   getP(id: number): Observable<PartidoDto> {
-    return this.http.get<PartidoDto>(`${this.baseUrl}/api/Admin/partidos/${id}`);
+    return this.http.get<PartidoDto>(`${this.baseUrl}/Admin/partidos/${id}`);
   }
 
   createP(payload: PartidoUpsert) {
-    return this.http.post<string>(`${this.baseUrl}/api/Admin/partidos`, payload, {
+    return this.http.post<string>(`${this.baseUrl}/Admin/partidos`, payload, {
       responseType: 'text' as 'json' // text/plain en backend
     });
   }
 
   updateP(id: number, payload: PartidoUpsert) {
-    return this.http.put<string>(`${this.baseUrl}/api/Admin/partidos/${id}`, payload, {
+    return this.http.put<string>(`${this.baseUrl}/Admin/partidos/${id}`, payload, {
       responseType: 'text' as 'json'
     });
   }
 
   deleteP(id: number) {
-    return this.http.delete<string>(`${this.baseUrl}/api/Admin/partidos/${id}`, {
+    return this.http.delete<string>(`${this.baseUrl}/Admin/partidos/${id}`, {
       responseType: 'text' as 'json'
     });
   }
 
   setRoster(partidoId: number, equipoId: number, jugadorIds: number[]) {
-    return this.http.post<string>(`${this.baseUrl}/api/Admin/partidos/${partidoId}/roster/equipo/${equipoId}`, jugadorIds, {
+    return this.http.post<string>(`${this.baseUrl}/Admin/partidos/${partidoId}/roster/equipo/${equipoId}`, jugadorIds, {
       responseType: 'text' as 'json'
     });
   }
 
   updateScore(id: number, payload: MarcadorDto) {
-    return this.http.put<string>(`${this.baseUrl}/api/Admin/partidos/${id}/marcador`, payload, {
+    return this.http.put<string>(`${this.baseUrl}/Admin/partidos/${id}/marcador`, payload, {
       responseType: 'text' as 'json'
     });
   }
@@ -190,17 +201,76 @@ export class ConsultasService {
         let params = new HttpParams();
         if (startDate) params = params.set('startDate', startDate);
         if (endDate)   params = params.set('endDate', endDate);
-        return this.http.get<PartidoDto[]>(`${this.baseUrl}/api/Partidos`, { params });
+        return this.http.get<PartidoDto[]>(`${this.baseUrl}/Partidos`, { params });
       }
 
       // Detalle público por id
       getPublicPartido(id: number) {
-        return this.http.get<PartidoDto>(`${this.baseUrl}/api/Partidos/${id}`);
+        return this.http.get<PartidoDto>(`${this.baseUrl}/Partidos/${id}`);
       }
 
       // Actualizar marcador (público)
       updatePublicScore(id: number, payload: MarcadorDto) {
-        return this.http.put<string>(`${this.baseUrl}/api/Partidos/${id}/marcador`, payload, {
+        return this.http.put<string>(`${this.baseUrl}/Partidos/${id}/marcador`, payload, {
+          responseType: 'text' as 'json'
+        });
+      }
+
+      getRoles() {
+  return this.http.get<RoleDto[]>(`${this.baseUrl}/Auth/roles`);
+}
+
+createRole(payload: { name: string }) {
+  return this.http.post<void>(`${this.baseUrl}/Auth/roles`, payload, {
+    responseType: 'text' as 'json' // por si devuelve text/plain
+  });
+}
+
+updateRole(id: number, payload: { name: string }) {
+  return this.http.put<void>(`${this.baseUrl}/Auth/roles/${id}`, payload, {
+    responseType: 'text' as 'json'
+  });
+}
+
+deleteRole(id: number) {
+  return this.http.delete<void>(`${this.baseUrl}/Auth/roles/${id}`, {
+    responseType: 'text' as 'json'
+  });
+}
+
+// USUARIOS
+      getUsers() {
+        return this.http.get<UserDto[]>(`${this.baseUrl}/Auth/users`);
+      }
+
+      getUser(id: number) {
+        return this.http.get<UserDto>(`${this.baseUrl}/Auth/users/${id}`);
+      }
+
+      // Crear usuario
+      register(payload: { username: string; password: string; roleId: number }) {
+        return this.http.post<void>(`${this.baseUrl}/Auth/register`, payload, {
+          responseType: 'text' as 'json'
+        });
+      }
+
+      // Editar usuario
+      updateUser(id: number, payload: { username: string; roleId: number }) {
+        return this.http.put<void>(`${this.baseUrl}/Auth/users/${id}`, payload, {
+          responseType: 'text' as 'json'
+        });
+      }
+
+      // Eliminar usuario
+      deleteUser(id: number) {
+        return this.http.delete<void>(`${this.baseUrl}/Auth/users/${id}`, {
+          responseType: 'text' as 'json'
+        });
+      }
+
+      // Cambiar contraseña
+      changePassword(id: number, payload: { newPassword: string }) {
+        return this.http.put<void>(`${this.baseUrl}/Auth/users/${id}/change-password`, payload, {
           responseType: 'text' as 'json'
         });
       }

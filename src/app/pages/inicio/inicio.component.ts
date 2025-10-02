@@ -6,6 +6,8 @@ import { EquiposComponent} from '../equipos/equipos.component';
 import { PartidosComponent } from '../partidos/partidos.component';
 import { JugadoresComponent } from '../jugadores/jugadores.component';
 import { VerpartidosComponent } from '../verpartidos/verpartidos.component';
+import { UsuariosComponent } from '../usuarios/usuarios.component';
+import { RolesComponent } from '../roles/roles.component';
 
 @Component({
   selector: 'app-inicio',
@@ -28,6 +30,8 @@ export class InicioComponent implements OnInit {
     jugadores: JugadoresComponent,
     partidos: PartidosComponent,
     verPartidos: VerpartidosComponent,
+    usuarios: UsuariosComponent,
+    roles: RolesComponent
   };
 
   constructor(private router: Router) {}
@@ -69,6 +73,8 @@ export class InicioComponent implements OnInit {
       {
         label: 'Administración',
         items: [
+          { label: 'Usuarios',    icon: 'pi pi-users',    command: () => this.select('usuarios') },
+          { label: 'Roles',    icon: 'pi pi-sitemap',    command: () => this.select('roles') },
           { label: 'Equipos',    icon: 'pi pi-sitemap',    command: () => this.select('equipos') },
           { label: 'Jugadores',  icon: 'pi pi-users',      command: () => this.select('jugadores') },
           { label: 'Partidos',   icon: 'pi pi-list-check', command: () => this.select('partidos') },
@@ -77,7 +83,7 @@ export class InicioComponent implements OnInit {
     ] : [];
 
     this.items = admin ? adminItems : comunes;
-    this.activeKey = admin ? 'equipos' : 'verPartidos';
+    this.activeKey = admin ? 'usuarios' : 'verPartidos';
   }
 
   select(key: string) {

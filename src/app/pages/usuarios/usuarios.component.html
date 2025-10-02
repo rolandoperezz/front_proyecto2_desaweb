@@ -1,0 +1,147 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="page-header">
+  <h2>Usuarios</h2>
+  <div class="actions">
+    <form [formGroup]="formFiltros" (ngSubmit)="applyFilters()" class="filters">
+      <span class="p-input-icon-left">
+        <i class="pi pi-search"></i>
+        <input pInputText type="text" placeholder="Buscar por usuario/rol..." formControlName="searchTerm">
+      </span>
+
+      <button pButton type="submit" label="Buscar" icon="pi pi-search" class="p-button-text"></button>
+      <button pButton type="button" label="Limpiar" icon="pi pi-filter-slash" class="p-button-text" (click)="resetFilters()"></button>
+    </form>
+
+    <button pButton label="Nuevo usuario" icon="pi pi-plus" (click)="openNew()"></button>
+  </div>
+</div>
+
+<p-table
+  [value]="users"
+  [paginator]="true"
+  [rows]="10"
+  [loading]="loading"
+  [rowHover]="true"
+  responsiveLayout="scroll"
+  emptyMessage="Sin datos">
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Usuario</th>
+      <th>Rol</th>
+      <th style="width: 260px;">Acciones</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-row>
+    <tr>
+      <td>{{ row.username }}</td>
+      <td>
+  {{ row.roleName || roleNameById.get(row.roleId) || '-' }}
+</td>
+
+      <td class="actions-col">
+        <button pButton class="p-button-text" icon="pi pi-key"  pTooltip="Cambiar contraseña" (click)="openChangePwd(row)"></button>
+        <button pButton class="p-button-text" icon="pi pi-pencil" (click)="openEdit(row)"></button>
+        <button pButton class="p-button-text p-button-danger" icon="pi pi-trash" (click)="askDelete(row)"></button>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<!-- Crear / Editar -->
+<p-dialog
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [closable]="false"
+  [style]="{ width: '520px' }"
+  [draggable]="false"
+  [breakpoints]="{ '768px': '92vw' }"
+>
+  <ng-template pTemplate="header">
+    <span class="dialog-title">
+      {{ isEdit ? 'Editar usuario' : 'Nuevo usuario' }}
+    </span>
+  </ng-template>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="dialog-form p-fluid">
+    <div class="form-field">
+      <label for="username">Usuario</label>
+      <input id="username" pInputText formControlName="username" placeholder="username" />
+      <small class="p-error" *ngIf="submitted && form.controls['username'].invalid">
+        Requerido (máx 100)
+      </small>
+    </div>
+
+    <div class="form-field">
+      <label for="roleId">Rol</label>
+      <p-dropdown
+        id="roleId"
+        formControlName="roleId"
+        [options]="roles"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Seleccione"
+      ></p-dropdown>
+      <small class="p-error" *ngIf="submitted && form.controls['roleId'].invalid">
+        Requerido
+      </small>
+    </div>
+
+    <div class="form-field" *ngIf="!isEdit">
+      <label for="password">Contraseña</label>
+      <input
+        id="password"
+        pInputText
+        type="password"
+        formControlName="password"
+        placeholder="••••••"
+        autocomplete="new-password"
+      />
+      <small class="p-error" *ngIf="submitted && form.controls['password'].invalid">
+        Mínimo 6 caracteres
+      </small>
+    </div>
+
+    <div class="dialog-actions">
+      <button pButton type="button" label="Cancelar" class="p-button-text" (click)="dialogVisible=false"></button>
+      <button pButton type="submit" label="Guardar" icon="pi pi-check" [disabled]="form.invalid"></button>
+    </div>
+  </form>
+</p-dialog>
+
+<!-- Cambiar contraseña -->
+<p-dialog
+  [(visible)]="pwdDialogVisible"
+  [modal]="true"
+  [closable]="false"
+  [style]="{ width: '420px' }"
+  [draggable]="false"
+  [breakpoints]="{ '768px': '92vw' }"
+>
+  <ng-template pTemplate="header">
+    <span class="dialog-title">Cambiar contraseña</span>
+  </ng-template>
+
+  <form [formGroup]="pwdForm" (ngSubmit)="changePassword()" class="dialog-form p-fluid">
+    <div class="form-field">
+      <label for="newPassword">Nueva contraseña</label>
+      <input
+        id="newPassword"
+        pInputText
+        type="password"
+        formControlName="newPassword"
+        placeholder="••••••"
+        autocomplete="new-password"
+      />
+      <small class="p-error" *ngIf="pwdSubmitted && pwdForm.controls['newPassword'].invalid">
+        Mínimo 6 caracteres
+      </small>
+    </div>
+
+    <div class="dialog-actions">
+      <button pButton type="button" label="Cancelar" class="p-button-text" (click)="pwdDialogVisible=false"></button>
+      <button pButton type="submit" label="Actualizar" icon="pi pi-check" [disabled]="pwdForm.invalid"></button>
+    </div>
+  </form>
+</p-dialog>

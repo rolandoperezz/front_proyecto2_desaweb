@@ -5,6 +5,8 @@ import { EquiposComponent } from './equipos/equipos.component';
 import { JugadoresComponent } from './jugadores/jugadores.component';
 import { PartidosComponent } from './partidos/partidos.component';
 import { InicioComponent } from './inicio/inicio.component';
+import { RolesComponent } from './roles/roles.component';
+import { UsuariosComponent } from './usuarios/usuarios.component';
 
 const routes: Routes = [
    {
@@ -15,6 +17,9 @@ const routes: Routes = [
       { path: 'jugadores', component: JugadoresComponent},   
       { path: 'partidos', component: PartidosComponent },   
       { path: 'inicio', component: InicioComponent },   
+      { path: 'roles', component: RolesComponent },   
+      { path: 'usuarios', component: UsuariosComponent },   
+
     ]
   },
 ];
